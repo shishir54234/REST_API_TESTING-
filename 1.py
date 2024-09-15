@@ -90,17 +90,19 @@ def success_getprogram(users,active_users,programs):
     # equal=tm.mkOp(Kind.EQUAL,tm.mkTuple([user1,progamids]))
     cond1=tm.mkTerm(Kind.SET_MEMBER,user1,users)
     cond2=tm.mkTerm(Kind.SET_MEMBER,user1,active_users)
+    pid=tm.mkVar(integer_sort,"pid")
+    forall=tm.mkTerm(Kind.FORALL,tm.mkTerm(Kind.VARIABLE_LIST,pid),tm.mkTerm(Kind.IMPLIES,tm.mkTerm(Kind.SET_MEMBER,pid,progamids),tm.mkTerm(Kind.SET_MEMBER,tm.mkTuple([user1,pid]),programs)))
     solver.assertFormula(cond1)
     solver.assertFormula(cond2)
+    solver.assertFormula(forall)
     res=solver.checkSat()
-    if res.isSat():
+    print(res)
+    if 1:
         user1=solver.getValue(user1)
         programs1=solver.getValue(programs)
         print("User id:",user1)
-        print("program ids for this user are: ")
-        for t in programs1:
-            if t[0]==user1:
-                print(t[1])
+        print("program ids for this user are: ", programs1)
+
         # print("Test Case generated for get program is ",user1,progamids)
 users = tm.mkConst(integer_set_sort,"users")
 credentials = tm.mkConst(tuple_set_sort,"creds")
@@ -111,6 +113,7 @@ success_signup(users,credentials)
 success_login(users,credentials,active_users)
 programs=success_programcreation(users,active_users,programs)
 print("check " ,solver.getValue(programs))
+
 success_getprogram(users,active_users,programs)
 
 
