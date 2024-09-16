@@ -19,6 +19,7 @@ tuple_sort = tm.mkTupleSort(integer,integer)  # Tuple sort for (username, passwo
 tuple_set_sort = tm.mkSetSort(tuple_sort)
 
 def success_signup(users,credentials):
+    solver.resetAssertions()
     user1=tm.mkConst(integer_sort,"user1")
     pass1=tm.mkConst(integer_sort,"pass1")
     doesit=tm.mkTerm(Kind.SET_MEMBER,user1,users)
@@ -29,8 +30,10 @@ def success_signup(users,credentials):
         p1=solver.getValue(pass1)
         users=tm.mkTerm(Kind.SET_INSERT,user1,users)
         credentials=tm.mkTerm(Kind.SET_INSERT, tm.mkTuple([user1,p1]), credentials)
+        
         print("Test Case generated for signup is ",user1,p1)
 def success_login(users,credentials,active_users):
+    solver.resetAssertions()
     user1=tm.mkConst(integer_sort,"user1")
     pass1=tm.mkConst(integer_sort,"pass1")
     doesit=tm.mkTerm(Kind.SET_MEMBER,user1,users)
@@ -45,6 +48,7 @@ def success_login(users,credentials,active_users):
         active_users=tm.mkTerm(Kind.SET_INSERT,user1,active_users)
         print("Test Case generated for login is ",user1,p1)
 def success_logout(users,active_users):
+    solver.resetAssertions()
     u1=tm.mkConst(integer_sort,"u1")
     user1=tm.mkConst(integer_set_sort,"user1")
 
@@ -63,6 +67,7 @@ def success_logout(users,active_users):
         print("Test Case generated for logout is ",user1)
 
 def success_programcreation(users,active_users,programs):
+    solver.resetAssertions()
     user4=tm.mkConst(integer_sort,"user4")
     progamid=tm.mkConst(integer_sort,"progamid")
     cond1=tm.mkTerm(Kind.SET_MEMBER,user4,users)
@@ -85,15 +90,18 @@ def success_programcreation(users,active_users,programs):
         
 
 def success_getprogram(users,active_users,programs):
+    print(programs)
+    solver.resetAssertions()
     user1=tm.mkConst(integer_sort,"user1")
-    progamids=tm.mkConst(integer_set_sort,"progamid")
+    progamids=tm.mkConst(integer_set_sort,"progamids")
     # equal=tm.mkOp(Kind.EQUAL,tm.mkTuple([user1,progamids]))
     cond1=tm.mkTerm(Kind.SET_MEMBER,user1,users)
-    cond2=tm.mkTerm(Kind.SET_MEMBER,user1,active_users)
+    # cond2=tm.mkTerm(Kind.SET_MEMBER,user1,active_users)
     pid=tm.mkVar(integer_sort,"pid")
-    forall=tm.mkTerm(Kind.FORALL,tm.mkTerm(Kind.VARIABLE_LIST,pid),tm.mkTerm(Kind.IMPLIES,tm.mkTerm(Kind.SET_MEMBER,pid,progamids),tm.mkTerm(Kind.SET_MEMBER,tm.mkTuple([user1,pid]),programs)))
-    solver.assertFormula(cond1)
-    solver.assertFormula(cond2)
+    forall=tm.mkTerm(Kind.FORALL,tm.mkTerm(Kind.VARIABLE_LIST,pid),tm.mkTerm(Kind.IMPLIES,tm.mkTerm(Kind.SET_MEMBER,tm.mkTuple([user1,pid]),programs),tm.mkTerm(Kind.SET_MEMBER,pid,progamids)))
+    forall=tm.mkTerm(Kind.IMPLIES,cond1,forall)
+    #solver.assertFormula(cond1)
+    # solver.assertFormula(cond2)
     solver.assertFormula(forall)
     res=solver.checkSat()
     print(res)
